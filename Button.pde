@@ -1,8 +1,8 @@
 public class Button {
   private String name;
   private float x, y, width, height, fontSize;
-  private int back_color = 255;
-  private int text_color = 0;
+  private int back_color;
+  private int text_color;
   private boolean toggable;
   boolean on;
 
@@ -17,6 +17,10 @@ public class Button {
     this.text_color = 0;
     this.toggable = toggable;
     this.on = false;
+  }
+  public Button(float p0, float p1, float width, float height, String name, boolean toggable, int fontSize) {
+    this(p0, p1, width, height, name, toggable);
+    this.fontSize = fontSize;
   }
 
   public void draw() {

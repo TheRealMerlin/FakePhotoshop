@@ -35,7 +35,7 @@ void setup() {
   buttons.put("bReset", new Button(216, 0, 35, 18, "Reset", false));
   buttons.put("bPenInc", new Button(width-175, 95, 35, 15, "+", false));
   buttons.put("bPenDec", new Button(width-130, 95, 35, 15, "-", false));
-  buttons.put("b3DFilter", new Button(width-270, 200, 75, 15, "3D Filter", false));
+  buttons.put("bWaterColor", new Button(width-270, 200, 250, 30, "WaterColor", false, 25));
   background(#777777);
   layers = new ArrayList<Layer>();
   layerSelected = 0;
@@ -168,8 +168,8 @@ void mousePressed() {
           penSize = penSize<50?penSize+1:penSize;
         }else if(entry.getKey().equals("bPenDec")) {
           penSize = penSize>1?penSize-1:penSize;
-        }else if(entry.getKey().equals("b3DFilter")) {
-          threeDFilter();
+        }else if(entry.getKey().equals("bWaterColor")) {
+          
         }
       }
     }
@@ -274,17 +274,6 @@ void outputSelected(File selection) {
   } else {
     output.save(selection.getAbsolutePath());
   }
-}
-
-void threeDFilter() {
-  temp = get(0, 20, width-300, height-20);
-  temp.loadPixels();
-  for(int i = 0; i < temp.pixels.length; i++) {
-    color c = temp.pixels[i];
-    temp.pixels[i] = color(red(c),green(c)-255,blue(c));
-  }
-  temp.updatePixels();
-  updateImage = true;
 }
 
 
