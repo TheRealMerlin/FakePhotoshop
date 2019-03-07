@@ -18,6 +18,7 @@ public class Button {
     this.toggable = toggable;
     this.on = false;
   }
+  
   public Button(float p0, float p1, float width, float height, String name, boolean toggable, int fontSize) {
     this(p0, p1, width, height, name, toggable);
     this.fontSize = fontSize;

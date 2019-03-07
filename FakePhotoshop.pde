@@ -13,7 +13,7 @@ boolean updateImage, removeImage, updateLayers;
 Layer current;
 
 enum Cursor {
-  MOVING, DRAWING;
+  MOVING, DRAWING, FILLING;
 }
 
 void setup() {
@@ -28,14 +28,15 @@ void setup() {
   buttons.put("bOpen", new Button(0, 0, 35, 18, "Open", false));
   buttons.put("bSave", new Button(36, 0, 35, 18, "Save", false));
   buttons.put("bClose", new Button(72, 0, 35, 18, "Close", false));
-  buttons.put("bColor", new Button(108, 0, 35, 18, "Color", false));
-  buttons.put("bPaint", new Button(144, 0, 35, 18, "Paint", true));
-  buttons.put("bMove", new Button(180, 0, 35, 18, "Move", true));
-  buttons.get("bMove").on = true;
-  buttons.put("bReset", new Button(216, 0, 35, 18, "Reset", false));
+  buttons.put("bReset", new Button(108, 0, 35, 18, "Reset", false));
+  buttons.put("bColor", new Button(width-75, 58, 50, 50, "Change Color", false));
   buttons.put("bPenInc", new Button(width-175, 95, 35, 15, "+", false));
   buttons.put("bPenDec", new Button(width-130, 95, 35, 15, "-", false));
-  buttons.put("bWaterColor", new Button(width-270, 200, 250, 30, "WaterColor", false, 25));
+  buttons.put("bMove", new Button(width-275, 150, 80, 18, "Move", true));
+  buttons.get("bMove").on = true;
+  buttons.put("bPaint", new Button(width-190, 150, 80, 18, "Paint", true));
+  buttons.put("bFill", new Button(width-105, 150, 80, 18, "Fill", true));
+  buttons.put("bWaterColor", new Button(width-275, 200, 250, 30, "WaterColor", false, 25));
   background(#777777);
   layers = new ArrayList<Layer>();
   layerSelected = 0;
@@ -127,10 +128,10 @@ void updateLayers() {
     for(Pixel p : l.pixels) {
       if(p.coords()[0] >= 0 && p.coords()[0] < temp.width && p.coords()[1] >= 0 && p.coords()[1] < temp.height) {
         temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = p.getColor();
-        temp.updatePixels();
       }
     }
   }
+  temp.updatePixels();
   image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
   updateLayers = false;
 }
@@ -151,23 +152,30 @@ void mousePressed() {
         }else if(entry.getKey().equals("bClose")) {
           temp = null;
           removeImage = true;
-        }else if(entry.getKey().equals("bColor")) {
-          cP = new ColorPicker();
-        }else if(entry.getKey().equals("bPaint")) {
-          cState = Cursor.DRAWING;
-          entry.getValue().on = true;
-          buttons.get("bMove").on = false;
-        }else if(entry.getKey().equals("bMove")) {
-          cState = Cursor.MOVING;
-          entry.getValue().on = true;
-          buttons.get("bPaint").on = false;
         }else if(entry.getKey().equals("bReset")) {
           temp = image;
           updateImage = true;
+        }else if(entry.getKey().equals("bColor")) {
+          cP = new ColorPicker();
         }else if(entry.getKey().equals("bPenInc")) {
           penSize = penSize<50?penSize+1:penSize;
         }else if(entry.getKey().equals("bPenDec")) {
           penSize = penSize>1?penSize-1:penSize;
+        }else if(entry.getKey().equals("bMove")) {
+          cState = Cursor.MOVING;
+          entry.getValue().on = true;
+          buttons.get("bPaint").on = false;
+          buttons.get("bFill").on = false;
+        }else if(entry.getKey().equals("bPaint")) {
+          cState = Cursor.DRAWING;
+          entry.getValue().on = true;
+          buttons.get("bMove").on = false;
+          buttons.get("bFill").on = false;
+        }else if(entry.getKey().equals("bFill")) {
+          cState = Cursor.FILLING;
+          entry.getValue().on = true;
+          buttons.get("bMove").on = false;
+          buttons.get("bPaint").on = false;
         }else if(entry.getKey().equals("bWaterColor")) {
           
         }
@@ -176,7 +184,6 @@ void mousePressed() {
   }else {
     if(cState == Cursor.MOVING) {
       for(int i = layers.size()-1; i >= 0; i--) {
-        println(i + " " + layers.get(i).onLayer());
         if(layers.get(i).onLayer()) {
           layerSelected = i;
           break;
@@ -184,6 +191,24 @@ void mousePressed() {
       }
       startX = mouseX;
       startY = mouseY;
+    }else if(cState == Cursor.FILLING) {
+      temp = get(0,20,width-300, height-20);
+      temp.loadPixels();
+      color startColor = temp.pixels[(mouseY-20)*temp.width+mouseX];
+      ArrayList<Pixel> test = new ArrayList<Pixel>();
+      for(int i = 0; i < temp.height; i++) {
+        for(int j = 0; j < temp.width; j++) {
+          color c = temp.pixels[i*temp.width+j];
+          if(c == startColor) {
+            test.add(new Pixel(j, i, startColor));
+          }
+        }
+      }
+      for(Pixel p : test) {
+        temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = primaryColor;
+      }
+      temp.updatePixels();
+      image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
     }
   }
 }
@@ -213,7 +238,7 @@ void mouseDragged() {
           if(x >= 0 && x < width-300 && y >= 0 && y < height-20) {
             double distance = Math.sqrt(Math.pow(x-mouseX,2)+Math.pow(y-mouseY+20,2));
             if(Math.round(distance) <= penSize/2) {
-              current.add(new Pixel(x, y, primaryColor));
+              current.add(new Pixel(x, y, secondaryColor));
             }
           }
         }
@@ -231,7 +256,6 @@ void mouseReleased() {
     if(!(mouseY <= 18 || mouseX >= width-300) && layerSelected > 0) {
       endX = mouseX;
       endY = mouseY;
-      println("dx: " + (endX-startX) + " dy: " + (endY-startY));
       layers.get(layerSelected).translate(endX-startX, endY-startY);
       updateLayers = true;
     }
