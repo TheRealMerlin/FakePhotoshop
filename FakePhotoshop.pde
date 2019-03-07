@@ -192,23 +192,43 @@ void mousePressed() {
       startX = mouseX;
       startY = mouseY;
     }else if(cState == Cursor.FILLING) {
-      temp = get(0,20,width-300, height-20);
-      temp.loadPixels();
-      color startColor = temp.pixels[(mouseY-20)*temp.width+mouseX];
-      ArrayList<Pixel> test = new ArrayList<Pixel>();
-      for(int i = 0; i < temp.height; i++) {
-        for(int j = 0; j < temp.width; j++) {
-          color c = temp.pixels[i*temp.width+j];
-          if(c == startColor) {
-            test.add(new Pixel(j, i, startColor));
+      if(mouseButton == LEFT) {
+        temp = get(0,20,width-300, height-20);
+        temp.loadPixels();
+        color startColor = temp.pixels[(mouseY-20)*temp.width+mouseX];
+        ArrayList<Pixel> test = new ArrayList<Pixel>();
+        for(int i = 0; i < temp.height; i++) {
+          for(int j = 0; j < temp.width; j++) {
+            color c = temp.pixels[i*temp.width+j];
+            if(c == startColor) {
+              test.add(new Pixel(j, i, startColor));
+            }
           }
         }
+        for(Pixel p : test) {
+          temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = primaryColor;
+        }
+        temp.updatePixels();
+        image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+      }else if(mouseButton == RIGHT) {
+        temp = get(0,20,width-300, height-20);
+        temp.loadPixels();
+        color startColor = temp.pixels[(mouseY-20)*temp.width+mouseX];
+        ArrayList<Pixel> test = new ArrayList<Pixel>();
+        for(int i = 0; i < temp.height; i++) {
+          for(int j = 0; j < temp.width; j++) {
+            color c = temp.pixels[i*temp.width+j];
+            if(c == startColor) {
+              test.add(new Pixel(j, i, startColor));
+            }
+          }
+        }
+        for(Pixel p : test) {
+          temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = secondaryColor;
+        }
+        temp.updatePixels();
+        image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
       }
-      for(Pixel p : test) {
-        temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = primaryColor;
-      }
-      temp.updatePixels();
-      image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
     }
   }
 }
