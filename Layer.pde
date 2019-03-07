@@ -20,7 +20,7 @@ public class Layer {
   
   public boolean onLayer() {
     for(Pixel p : pixels) {
-      if(p.coords()[0] == mouseX && p.coords()[1] == mouseY) {
+      if(p.coords()[0] == mouseX && p.coords()[1] == mouseY-20) {
         return true;
       }
     }

@@ -194,22 +194,12 @@ void mouseDragged() {
       fill(primaryColor);
       stroke(primaryColor);
       circle(mouseX, mouseY, penSize);
-      for(int x = 0; x <= penSize; x++) {
-        for(int y = 0; y <= penSize; y++) {
-          int dx1 = mouseX + x;
-          int dy1 = mouseY + y;
-          int dx2 = mouseX - x;
-          int dy2 = mouseY - y;
-          if(dx1 >= 0 && dx1 <= width-300 && dy1 >= 20 && dy1 <= height) {
-            double distance = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-            if(distance <= penSize) {
-              current.add(new Pixel(dx1, dy1, primaryColor));
-            }
-          }
-          if(dx2 >= 0 && dx2 <= width-300 && dy2 >= 20 && dy2 <= height) {
-            double distance = Math.sqrt(Math.pow(-x,2)+Math.pow(-y,2));
-            if(distance <= penSize) {
-              current.add(new Pixel(dx2, dy2, primaryColor));
+      for(int y = mouseY-20-penSize/2; y <= mouseY-20+penSize/2; y++) {
+        for(int x = mouseX-penSize/2; x <= mouseX+penSize/2; x++) {
+          if(x >= 0 && x < width-300 && y >= 0 && y < height-20) {
+            double distance = Math.sqrt(Math.pow(x-mouseX,2)+Math.pow(y-mouseY+20,2));
+            if(Math.round(distance) <= penSize/2) {
+              current.add(new Pixel(x, y, primaryColor));
             }
           }
         }
@@ -218,22 +208,12 @@ void mouseDragged() {
       fill(secondaryColor);
       stroke(secondaryColor);
       circle(mouseX, mouseY, penSize);
-      for(int x = 0; x <= penSize; x++) {
-        for(int y = 0; y <= penSize; y++) {
-          int dx1 = mouseX + x;
-          int dy1 = mouseY + y;
-          int dx2 = mouseX - x;
-          int dy2 = mouseY - y;
-          if(dx1 >= 0 && dx1 <= width-300 && dy1 >= 20 && dy1 <= height) {
-            double distance = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
-            if(distance <= penSize) {
-              current.add(new Pixel(dx1, dy1, secondaryColor));
-            }
-          }
-          if(dx2 >= 0 && dx2 <= width-300 && dy2 >= 20 && dy2 <= height) {
-            double distance = Math.sqrt(Math.pow(-x,2)+Math.pow(-y,2));
-            if(distance <= penSize) {
-              current.add(new Pixel(dx2, dy2, secondaryColor));
+      for(int y = mouseY-20-penSize/2; y <= mouseY-20+penSize/2; y++) {
+        for(int x = mouseX-penSize/2; x <= mouseX+penSize/2; x++) {
+          if(x >= 0 && x < width-300 && y >= 0 && y < height-20) {
+            double distance = Math.sqrt(Math.pow(x-mouseX,2)+Math.pow(y-mouseY+20,2));
+            if(Math.round(distance) <= penSize/2) {
+              current.add(new Pixel(x, y, primaryColor));
             }
           }
         }
