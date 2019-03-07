@@ -9,11 +9,11 @@ ColorPicker cP;
 color primaryColor, secondaryColor;
 Cursor cState;
 int penSize, layerSelected, startX, startY, endX, endY;
-boolean updateImage, removeImage, updateLayers;
+boolean updateImage, removeImage, updateLayers, updateState;
 Layer current;
 
 enum Cursor {
-  MOVING, DRAWING, FILLING;
+  MOVING, DRAWING, FILLING, CROPPING;
 }
 
 void setup() {
@@ -32,17 +32,19 @@ void setup() {
   buttons.put("bColor", new Button(width-75, 58, 50, 50, "Change Color", false));
   buttons.put("bPenInc", new Button(width-175, 95, 35, 15, "+", false));
   buttons.put("bPenDec", new Button(width-130, 95, 35, 15, "-", false));
-  buttons.put("bMove", new Button(width-275, 150, 80, 18, "Move", true));
+  buttons.put("bMove", new Button(width-275, 150, 80, 20, "Move", true));
   buttons.get("bMove").on = true;
-  buttons.put("bPaint", new Button(width-190, 150, 80, 18, "Paint", true));
-  buttons.put("bFill", new Button(width-105, 150, 80, 18, "Fill", true));
-  buttons.put("bWaterColor", new Button(width-275, 200, 250, 30, "WaterColor", false, 25));
+  buttons.put("bPaint", new Button(width-190, 150, 80, 20, "Paint", true));
+  buttons.put("bFill", new Button(width-105, 150, 80, 20, "Fill", true));
+  buttons.put("bCrop", new Button(width-190, 175, 80, 20, "Crop", true));
+  //buttons.put("bWaterColor", new Button(width-275, 200, 250, 30, "WaterColor", false, 25));
   background(#777777);
   layers = new ArrayList<Layer>();
   layerSelected = 0;
   updateImage = false;
   removeImage = true;
   updateLayers = false;
+  updateState = false;
 }
 
 void draw() {
@@ -119,6 +121,19 @@ void updateAll() {
   if(updateLayers) {
     updateLayers();
   }
+  if(updateState) {
+    buttons.get("bMove").on = false;
+    buttons.get("bPaint").on = false;
+    buttons.get("bFill").on = false;
+    buttons.get("bCrop").on = false;
+    switch(cState) {
+      case MOVING: buttons.get("bMove").on = true; break;
+      case DRAWING: buttons.get("bPaint").on = true; break;
+      case FILLING: buttons.get("bFill").on = true; break;
+      case CROPPING: buttons.get("bCrop").on = true; break;
+    }
+    updateState = false;
+  }
 }
 
 void updateLayers() {
@@ -163,21 +178,16 @@ void mousePressed() {
           penSize = penSize>1?penSize-1:penSize;
         }else if(entry.getKey().equals("bMove")) {
           cState = Cursor.MOVING;
-          entry.getValue().on = true;
-          buttons.get("bPaint").on = false;
-          buttons.get("bFill").on = false;
+          updateState = true;
         }else if(entry.getKey().equals("bPaint")) {
           cState = Cursor.DRAWING;
-          entry.getValue().on = true;
-          buttons.get("bMove").on = false;
-          buttons.get("bFill").on = false;
+          updateState = true;
         }else if(entry.getKey().equals("bFill")) {
           cState = Cursor.FILLING;
-          entry.getValue().on = true;
-          buttons.get("bMove").on = false;
-          buttons.get("bPaint").on = false;
-        }else if(entry.getKey().equals("bWaterColor")) {
-          
+          updateState = true;
+        }else if(entry.getKey().equals("bCrop")) {
+          cState = Cursor.CROPPING;
+          updateState = true;
         }
       }
     }
@@ -229,6 +239,10 @@ void mousePressed() {
         temp.updatePixels();
         image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
       }
+    }else if(cState == Cursor.CROPPING) {
+      temp = get(0, 20, width-300, height-20);
+      startX = mouseX;
+      startY = mouseY;
     }
   }
 }
@@ -264,6 +278,11 @@ void mouseDragged() {
         }
       }
     }
+  }else if(cState == Cursor.CROPPING) {
+    image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+    stroke(0);
+    noFill();
+    rect(startX, startY, mouseX-startX, mouseY-startY);
   }
 }
 
@@ -272,13 +291,31 @@ void mouseReleased() {
     if(current != null && current.pixels.size() != 0) {
       layers.add(current);
     }
-  }else if(cState == Cursor.MOVING) {
-    if(!(mouseY <= 18 || mouseX >= width-300) && layerSelected > 0) {
+  }else if(cState == Cursor.MOVING && !(mouseY <= 18 || mouseX >= width-300)) {
+    if(layerSelected > 0) {
       endX = mouseX;
       endY = mouseY;
       layers.get(layerSelected).translate(endX-startX, endY-startY);
       updateLayers = true;
     }
+  }else if(cState == Cursor.CROPPING && !(mouseY <= 18 || mouseX >= width-300)) {
+    endX = mouseX;
+    endY = mouseY;
+    removeImage = true;
+    if(startX < endX && startY < endY) {
+      temp = get(startX+1, startY+1, endX-startX-1, endY-startY-1);
+    }else if(startX > endX && startY < endY) {
+      temp = get(endX+1, startY+1, startX-endX-1, endY-startY-1);
+    }else if(startX < endX && startY > endY) {
+      temp = get(startX+1, endY+1, endX-startX-1, startY-endY-1);
+    }else if(startX > endX && startY > endY) {
+      temp = get(endX+1, endY+1, startX-endX-1, startY-endY-1);
+    }else {
+      removeImage = false;
+      updateImage = true;
+    }
+    reset();
+    image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
   }
 }
 

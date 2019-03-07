@@ -1,3 +1,6 @@
+/* 
+This was a failed effort, please disrgard! :)
+*/
 public class DropBox {
   private int i, j, bWidth, bHeight;
   private String name;
