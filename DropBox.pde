@@ -1,5 +1,5 @@
 /* 
-This was a failed effort, please disrgard! :)
+This was a failed effort, please disregard! :)
 */
 public class DropBox {
   private int i, j, bWidth, bHeight;

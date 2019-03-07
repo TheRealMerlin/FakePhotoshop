@@ -37,7 +37,9 @@ void setup() {
   buttons.put("bPaint", new Button(width-190, 150, 80, 20, "Paint", true));
   buttons.put("bFill", new Button(width-105, 150, 80, 20, "Fill", true));
   buttons.put("bCrop", new Button(width-190, 175, 80, 20, "Crop", true));
-  //buttons.put("bWaterColor", new Button(width-275, 200, 250, 30, "WaterColor", false, 25));
+  buttons.put("bWaterColor", new Button(width-275, 225, 250, 30, "Water Color", false, 25));
+  buttons.put("bMosaic", new Button(width-275, 265, 250, 30, "Mosaic", false, 25));
+  buttons.put("bBlur", new Button(width-275, 305, 250, 30, "Blur", false, 25));
   background(#777777);
   layers = new ArrayList<Layer>();
   layerSelected = 0;
@@ -66,7 +68,7 @@ void reset() {
   if(updateImage) {
     if(temp != null) {
       temp.resize(width-300, height-20);
-      image(temp, (width-300)/2-image.width/2, (height+20)/2-image.height/2);
+      image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
       temp.loadPixels();
       layers.add(new Layer(temp.pixels, width-300, height-20));
       updateImage = false;
@@ -188,6 +190,12 @@ void mousePressed() {
         }else if(entry.getKey().equals("bCrop")) {
           cState = Cursor.CROPPING;
           updateState = true;
+        }else if(entry.getKey().equals("bWaterColor")) {
+          waterColor();
+        }else if(entry.getKey().equals("bMosaic")) {
+          mosaic();
+        }else if(entry.getKey().equals("bBlur")) {
+          blur();
         }
       }
     }
@@ -278,7 +286,7 @@ void mouseDragged() {
         }
       }
     }
-  }else if(cState == Cursor.CROPPING) {
+  }else if(cState == Cursor.CROPPING && !(mouseY <= 18 || mouseX >= width-300)) {
     image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
     stroke(0);
     noFill();
@@ -315,8 +323,81 @@ void mouseReleased() {
       updateImage = true;
     }
     reset();
+    temp.loadPixels();
     image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+    layers.add(new Layer(temp.pixels, temp.width, temp.height, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2));
   }
+}
+
+void waterColor() {
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  color[] newarr = temp.pixels;
+  for(int i = 0; i < temp.height; i+=5+5*Math.random()){
+    for(int j = 0; j < temp.width; j+=5+5*Math.random()){
+      fill(newarr[i*temp.width+j]);
+      stroke(newarr[i*temp.width+j]);
+      circle(j,i+20,10);
+    }
+  }
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  reset();
+  image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+  layers.add(new Layer(temp.pixels, width-300, height-20));
+}
+
+void mosaic() {
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  for(int i = 0; i < temp.height; i+=10){
+    for(int j = 0; j < temp.width; j+=10){
+      color newcolor;
+      ArrayList<Integer> arr = new ArrayList<Integer>();
+      for(int y = i; y < 10+i; y++){
+        for(int x = j; x < 10+j; x++){
+          try{
+          arr.add(temp.pixels[y*temp.width+x]);
+          }catch(Exception e){}
+        }
+      }
+      int r = 0;
+      int g = 0;
+      int b = 0;
+      for(color a : arr){
+       r+=red(a);
+       g+=green(a);
+       b+=blue(a);
+      }
+      newcolor = color(r/arr.size(),g/arr.size(),b/arr.size());
+      fill(newcolor);
+      stroke(0);
+      rect(j,i+20,10,10);
+    }
+  }
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  reset();
+  image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+  layers.add(new Layer(temp.pixels, width-300, height-20));
+}
+
+void blur() {
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  color[] newarr = temp.pixels;
+  for (int i = 0; i < temp.height; i+=3+1*Math.random()) {
+    for (int j = 0; j < temp.width; j+=3+1*Math.random()) {
+      strokeWeight(1);
+      stroke(newarr[i*temp.width+j]);
+      line(j, i+20, j-30, i+50);
+    }
+  }
+  temp = get(0, 20, width-300, height-20);
+  temp.loadPixels();
+  reset();
+  image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+  layers.add(new Layer(temp.pixels, width-300, height-20));
 }
 
 void inputSelected(File selection) {

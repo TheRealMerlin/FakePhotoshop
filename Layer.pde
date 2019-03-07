@@ -14,6 +14,15 @@ public class Layer {
     }
   }
   
+  public Layer(color[] pixels, int width, int height, int startX, int startY) {
+    this.pixels = new ArrayList<Pixel>();
+    for(int i = 0; i < height; i++) {
+      for(int j = 0; j < width; j++) {
+        this.add(new Pixel(j+startX, i+startY-20, pixels[i*width+j]));
+      }
+    }
+  }
+  
   public void add(Pixel p) {
     pixels.add(p);
   }
