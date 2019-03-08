@@ -227,7 +227,9 @@ void mousePressed() {
           temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = primaryColor;
         }
         temp.updatePixels();
+        reset();
         image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+        layers.add(new Layer(temp.pixels, temp.width, temp.height, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2));
       }else if(mouseButton == RIGHT) {
         temp = get(0,20,width-300, height-20);
         temp.loadPixels();
@@ -245,7 +247,9 @@ void mousePressed() {
           temp.pixels[p.coords()[1]*temp.width+p.coords()[0]] = secondaryColor;
         }
         temp.updatePixels();
+        reset();
         image(temp, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2);
+        layers.add(new Layer(temp.pixels, temp.width, temp.height, (width-300)/2-temp.width/2, (height+20)/2-temp.height/2));
       }
     }else if(cState == Cursor.CROPPING) {
       temp = get(0, 20, width-300, height-20);
